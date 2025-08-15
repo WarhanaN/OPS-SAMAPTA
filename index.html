@@ -1,0 +1,375 @@
+
+<!DOCTYPE html>     
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aplikasi Pengacak Nama</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #b02626e3 0%, #322b6bc2 100%);
+            min-height: 100vh;
+        }
+        
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px 0 rgba(31, 38, 135, 0.2);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px 0 rgba(31, 38, 135, 0.4);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px 0 rgba(102, 126, 234, 0.4);
+        }
+        
+        .table-input {
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+        
+        .table-input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .result-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+        }
+        
+        .number-badge {
+            background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+            color: white;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .bounce {
+            animation: bounce 0.6s ease-in-out;
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 60%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            80% { transform: translateY(-5px); }
+        }
+    </style>
+</head>
+<body class="p-4">
+    <div class="container mx-auto max-w-4xl">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <div class="glass-effect p-6 mb-6">
+                <h1 class="text-4xl font-bold text-white mb-2">🎲 Aplikasi Pengacak Nama</h1>
+                <p class="text-white text-opacity-80">Masukkan nama-nama dan acak urutannya secara otomatis</p>
+            </div>
+        </div>
+
+        <!-- Step 1: Input Number of Names -->
+        <div id="step1" class="glass-effect p-6 mb-6">
+            <h2 class="text-2xl font-semibold text-white mb-4">📝 Langkah 1: Tentukan Jumlah Nama</h2>
+            <div class="flex flex-col sm:flex-row gap-4 items-center">
+                <label for="nameCount" class="text-white font-medium">Jumlah Nama:</label>
+                <input type="number" id="nameCount" min="2" max="500" value="5" 
+                       class="px-4 py-2 rounded-lg border-none outline-none text-gray-700 font-medium w-24">
+                <button onclick="generateTable()" 
+                        class="btn-primary text-white px-6 py-2 rounded-lg font-medium border-none cursor-pointer">
+                    Buat Tabel
+                </button>
+            </div>
+        </div>
+
+        <!-- Step 2: Input Names Table -->
+        <div id="step2" class="glass-effect p-6 mb-6" style="display: none;">
+            <h2 class="text-2xl font-semibold text-white mb-4">✏️ Langkah 2: Masukkan Nama-Nama</h2>
+            <div id="nameTable" class="mb-4"></div>
+            <div class="flex gap-4">
+                <button onclick="randomizeNames()" 
+                        class="btn-secondary text-white px-6 py-3 rounded-lg font-medium border-none cursor-pointer">
+                    🎯 Konfirmasi & Acak Nama
+                </button>
+                <button onclick="resetApp()" 
+                        class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-lg font-medium border-none cursor-pointer transition-colors">
+                    🔄 Reset
+                </button>
+            </div>
+        </div>
+
+        <!-- Step 3: Results -->
+        <div id="step3" class="glass-effect p-6" style="display: none;">
+            <h2 class="text-2xl font-semibold text-white mb-4">🎉 Hasil Pengacakan</h2>
+            <div id="results" class="grid gap-3"></div>
+            <div class="mt-6 flex flex-wrap gap-4">
+                <button onclick="randomizeAgain()" 
+                        class="btn-primary text-white px-6 py-3 rounded-lg font-medium border-none cursor-pointer">
+                    🎲 Acak Lagi
+                </button>
+                <button onclick="backToEdit()" 
+                        class="bg-yellow-500 hover:bg-yellow-600 text-white px-6 py-3 rounded-lg font-medium border-none cursor-pointer transition-colors">
+                    ✏️ Edit Nama
+                </button>
+                <button onclick="exportToExcel()"
+                        class="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg font-medium border-none cursor-pointer transition-colors">
+                    📊 Export Excel
+                </button>
+                <button onclick="exportToWord()"
+                        class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg font-medium border-none cursor-pointer transition-colors">
+                    📝 Export Word
+                </button>
+                <button onclick="resetApp()" 
+                        class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-lg font-medium border-none cursor-pointer transition-colors">
+                    🆕 Mulai Baru
+                </button>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="text-center mt-8">
+            <p class="text-white text-opacity-60">© 2025 APLIKASI OPS DITSAMAPTA POLDA KALTIM</p>
+        </div>
+    </div>
+
+    <script>
+        let originalNames = [];
+        
+        function generateTable() {
+            const count = parseInt(document.getElementById('nameCount').value);
+            
+            if (count < 2 || count > 500) {
+                alert('Jumlah nama harus antara 2 dan 500!');
+                return;
+            }
+            
+            const tableContainer = document.getElementById('nameTable');
+            let tableHTML = '<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">';
+            
+            for (let i = 1; i <= count; i++) {
+                tableHTML += `
+                    <div class="flex items-center gap-3 p-3 bg-white bg-opacity-20 rounded-lg">
+                        <div class="number-badge">${i}</div>
+                        <input type="text" 
+                               id="name${i}" 
+                               placeholder="Masukkan nama ${i}"
+                               class="table-input flex-1 px-3 py-2 rounded-lg border-none outline-none text-gray-700">
+                    </div>
+                `;
+            }
+            
+            tableHTML += '</div>';
+            tableContainer.innerHTML = tableHTML;
+            
+            // Show step 2
+            document.getElementById('step2').style.display = 'block';
+            document.getElementById('step2').classList.add('fade-in');
+            
+            // Scroll to step 2
+            document.getElementById('step2').scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        function randomizeNames() {
+            const count = parseInt(document.getElementById('nameCount').value);
+            const names = [];
+            
+            // Collect names from inputs
+            for (let i = 1; i <= count; i++) {
+                const nameInput = document.getElementById(`name${i}`);
+                const name = nameInput.value.trim();
+                
+                if (name === '') {
+                    alert(`Nama ${i} tidak boleh kosong!`);
+                    nameInput.focus();
+                    return;
+                }
+                
+                names.push(name);
+            }
+            
+            // Check for duplicate names
+            const uniqueNames = [...new Set(names)];
+            if (uniqueNames.length !== names.length) {
+                alert('Ada nama yang duplikat! Pastikan semua nama unik.');
+                return;
+            }
+            
+            // Store original names
+            originalNames = [...names];
+            
+            // Shuffle the names using Fisher-Yates algorithm
+            const shuffledNames = [...names];
+            for (let i = shuffledNames.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffledNames[i], shuffledNames[j]] = [shuffledNames[j], shuffledNames[i]];
+            }
+            
+            // Display results
+            displayResults(shuffledNames);
+            
+            // Show step 3
+            document.getElementById('step3').style.display = 'block';
+            document.getElementById('step3').classList.add('fade-in');
+            
+            // Scroll to results
+            document.getElementById('step3').scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        function displayResults(names) {
+            const resultsContainer = document.getElementById('results');
+            let resultsHTML = '';
+            
+            names.forEach((name, index) => {
+                resultsHTML += `
+                    <div class="result-card p-4 flex items-center gap-4 bounce relative group" style="animation-delay: ${index * 0.1}s;" data-name="${name}">
+                        <div class="number-badge">${index + 1}</div>
+                        <div class="flex-1">
+                            <span class="text-gray-800 font-medium text-lg">${name}</span>
+                        </div>
+                        <div class="text-gray-500 text-sm">Urutan ${index + 1}</div>
+                        <button onclick="deleteName(event)" class="absolute right-3 hidden group-hover:block text-red-500 hover:text-red-700">
+                            ❌
+                        </button>
+                    </div>
+                `;
+            });
+            
+            resultsContainer.innerHTML = resultsHTML;
+        }
+        
+        function randomizeAgain() {
+            if (originalNames.length === 0) return;
+            
+            // Shuffle again
+            const shuffledNames = [...originalNames];
+            for (let i = shuffledNames.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffledNames[i], shuffledNames[j]] = [shuffledNames[j], shuffledNames[i]];
+            }
+            
+            displayResults(shuffledNames);
+        }
+        
+        function backToEdit() {
+            document.getElementById('step3').style.display = 'none';
+            document.getElementById('step2').scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        function resetApp() {
+            // Reset all steps
+            document.getElementById('step2').style.display = 'none';
+            document.getElementById('step3').style.display = 'none';
+            
+            // Clear data
+            originalNames = [];
+            document.getElementById('nameCount').value = 5;
+            
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        
+        // Add enter key support for inputs
+        document.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                if (e.target.id === 'nameCount') {
+                    generateTable();
+                } else if (e.target.id.startsWith('name')) {
+                    // Focus next input or randomize if last
+                    const currentNum = parseInt(e.target.id.replace('name', ''));
+                    const totalCount = parseInt(document.getElementById('nameCount').value);
+                    
+                    if (currentNum < totalCount) {
+                        document.getElementById(`name${currentNum + 1}`).focus();
+                    } else {
+                        randomizeNames();
+                    }
+                }
+            }
+        });
+
+        function deleteName(event) {
+            const card = event.target.closest('.result-card');
+            const name = card.getAttribute('data-name');
+            originalNames = originalNames.filter(n => n !== name);
+            card.remove();
+        }
+
+        function exportToExcel() {
+            const names = Array.from(document.querySelectorAll('.result-card span')).map(el => el.textContent);
+            let csvContent = "data:text/csv;charset=utf-8,";
+            csvContent += "No,Nama\n";
+            names.forEach((name, i) => {
+                csvContent += `${i+1},${name}\n`;
+            });
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "hasil_acakan.csv");
+            document.body.appendChild(link);
+            link.click();
+        }
+
+        function exportToWord() {
+            const names = Array.from(document.querySelectorAll('.result-card span')).map(el => el.textContent);
+            let htmlContent = `
+                <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word'>
+                <head><title>Hasil Acakan Nama</title></head>
+                <body>
+                <h1>Hasil Pengacakan Nama</h1>
+                <ol>
+            `;
+            names.forEach(name => {
+                htmlContent += `<li>${name}</li>`;
+            });
+            htmlContent += `</ol></body></html>`;
+            
+            const blob = new Blob(['\ufeff', htmlContent], {type: 'application/msword'});
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'hasil_acakan.doc';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    </script>
+</body>
+</html>
+
